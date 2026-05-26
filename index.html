@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhenoBrasil – Seed Bank</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d0d;
+  --bg2: #141414;
+  --bg3: #1c1c1c;
+  --border: #2a2a2a;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --green: #3a7d44;
+  --green2: #4caf50;
+  --white: #f0ede8;
+  --muted: #888;
+  --red: #e05252;
+}
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+/* TOP BAR */
+.topbar { background: var(--green); padding: 0.4rem 2rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; letter-spacing: 0.05em; }
+.topbar a { color: rgba(255,255,255,0.85); text-decoration: none; cursor: pointer; font-weight: 600; }
+.topbar a:hover { color: #fff; }
+
+/* NAV */
+nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; position: sticky; top: 0; z-index: 200; }
+.nav-logo h2 { font-family: 'Barlow Condensed'; font-weight: 800; cursor: pointer; letter-spacing: 1px; }
+.nav-center { display: flex; gap: 0; list-style: none; align-items: center; }
+.nav-center > li > a {
+  color: var(--white); text-decoration: none; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 1.2rem; height: 70px; display: flex; align-items: center; gap: 0.3rem;
+  border-bottom: 3px solid transparent; transition: all 0.2s;
+}
+.nav-center > li > a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* DROPDOWN */
+.nav-center > li { position: relative; }
+.arrow { font-size: 0.6rem; opacity: 0.6; transition: transform 0.2s; display: inline-block; margin-left: 0.2rem; }
+.nav-center > li:hover > a .arrow { transform: rotate(180deg); }
+.dropdown {
+  position: absolute; top: 100%; left: 0;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-top: 2px solid var(--gold); min-width: 210px;
+  opacity: 0; pointer-events: none; transform: translateY(6px);
+  transition: all 0.2s; z-index: 300;
+}
+.nav-center > li:hover .dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
+.dropdown a {
+  display: block; padding: 0.8rem 1.2rem;
+  color: var(--white); text-decoration: none;
+  font-family: 'Barlow Condensed'; font-size: 0.9rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border); transition: all 0.15s;
+}
+.dropdown a:last-child { border-bottom: none; }
+.dropdown a:hover { background: var(--bg3); color: var(--gold); padding-left: 1.6rem; }
+.dropdown-sub { display: block; font-family: 'Barlow'; font-size: 0.72rem; color: var(--muted); text-transform: none; font-weight: 400; letter-spacing: 0; margin-top: 0.1rem; }
+
+/* SEÇÃO BREEDERS */
+.breeders-section { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem 0; display: none; }
+.breeders-section.visible { display: block; }
+.breeders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.2rem; margin-top: 1.5rem; }
+.breeder-card-pub {
+  background: var(--bg2); border: 1px solid var(--border);
+  padding: 1.5rem 1rem; border-radius: 4px; text-align: center;
+  transition: all 0.2s; cursor: pointer;
+}
+.breeder-card-pub:hover { border-color: var(--gold); transform: translateY(-2px); }
+.breeder-card-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  object-fit: cover; border: 2px solid var(--border);
+  margin: 0 auto 0.8rem; display: block; background: var(--bg3);
+}
+.breeder-card-pub:hover .breeder-card-avatar { border-color: var(--gold); }
+.breeder-card-name { font-family: 'Barlow Condensed'; font-size: 1rem; font-weight: 700; text-transform: uppercase; }
+.breeder-card-count { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.nav-btn { background: transparent; border: 1px solid var(--border); color: var(--white); padding: 0.45rem 1rem; font-size: 0.82rem; font-family: 'Barlow', sans-serif; cursor: pointer; transition: all 0.2s; border-radius: 2px; text-transform: uppercase; font-weight: 600; }
+.nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+.nav-btn.primary { background: var(--gold); border-color: var(--gold); color: #000; font-weight: bold; }
+
+/* BOTÃO CARRINHO NA NAV */
+.cart-nav-btn {
+  position: relative; background: transparent; border: 1px solid var(--border);
+  color: var(--white); width: 42px; height: 42px; border-radius: 2px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; transition: all 0.2s; flex-shrink: 0;
+}
+.cart-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+.cart-badge {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--gold); color: #000;
+  font-family: 'Barlow Condensed'; font-size: 0.65rem; font-weight: 800;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+}
+.cart-badge.visible { display: flex; }
+
+/* HERO */
+.hero { background: linear-gradient(135deg, #0d0d0d 0%, #1a2a1a 50%, #0d0d0d 100%); padding: 5rem 2rem; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+.hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(3rem, 8vw, 6rem); font-weight: 800; text-transform: uppercase; line-height: 0.95; margin-bottom: 1.2rem; }
+.hero h1 span { color: var(--gold); }
+.hero p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+
+/* MAIN CONTENT */
+.main-wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.section-head h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.section-head h2 span { color: var(--gold); }
+
+/* PRODUCT GRID */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.product-card { background: var(--bg2); border: 1px solid var(--border); transition: all 0.2s; position: relative; overflow: hidden; border-radius: 4px; }
+.product-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.product-img { width: 100%; height: 240px; object-fit: cover; display: block; }
+.breeder-tag { position: absolute; top: 10px; left: 10px; background: var(--green); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; text-transform: uppercase; border-radius: 2px; }
+.product-body { padding: 1.2rem; }
+.product-type { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.3rem; }
+.product-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.8rem; color: var(--white); }
+.product-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
+.product-price { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+.add-btn {
+  background: var(--green); color: #fff; border: none;
+  padding: 0.5rem 1rem; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all 0.2s;
+}
+.add-btn:hover { background: var(--green2); }
+.add-btn.added { background: var(--gold); color: #000; }
+
+/* MODAL LOGIN */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--gold); width: 100%; max-width: 400px; padding: 2.5rem; position: relative; border-radius: 4px; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+.modal h2 { font-family: 'Barlow Condensed'; font-size: 1.8rem; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 0.03em; }
+.form-group { margin-bottom: 1.1rem; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+.form-group input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--white); padding: 0.75rem 1rem; outline: none; font-family: 'Barlow', sans-serif; border-radius: 2px; }
+.form-group input:focus { border-color: var(--gold); }
+.form-submit { width: 100%; background: var(--green); color: #fff; border: none; padding: 0.9rem; font-family: 'Barlow Condensed'; font-size: 1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; letter-spacing: 0.05em; border-radius: 2px; transition: background 0.2s; }
+.form-submit:hover { background: var(--green2); }
+
+/* DRAWER CARRINHO */
+.cart-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 700; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.cart-backdrop.open { opacity: 1; pointer-events: all; }
+
+.cart-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 380px; max-width: 100vw;
+  background: var(--bg2); border-left: 1px solid var(--border);
+  z-index: 800; display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.cart-drawer.open { transform: translateX(0); }
+
+.cart-header {
+  padding: 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.cart-header h3 {
+  font-family: 'Barlow Condensed'; font-size: 1.4rem;
+  font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.cart-close-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.4rem; cursor: pointer; line-height: 1;
+  transition: color 0.2s;
+}
+.cart-close-btn:hover { color: var(--white); }
+
+.cart-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
+.cart-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 1rem;
+  color: var(--muted); text-align: center;
+}
+.cart-empty-icon { font-size: 3rem; opacity: 0.4; }
+
+.cart-item {
+  display: grid; grid-template-columns: 60px 1fr auto;
+  gap: 0.8rem; align-items: center;
+  padding: 0.9rem 0; border-bottom: 1px solid var(--border);
+}
+.cart-item:last-child { border-bottom: none; }
+.cart-item-img {
+  width: 60px; height: 60px; object-fit: cover;
+  border-radius: 2px; border: 1px solid var(--border);
+}
+.cart-item-name {
+  font-family: 'Barlow Condensed'; font-size: 1rem;
+  font-weight: 700; text-transform: uppercase; line-height: 1.2;
+}
+.cart-item-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+.cart-item-price { color: var(--gold); font-family: 'Barlow Condensed'; font-weight: 700; }
+.cart-item-controls {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;
+}
+.qty-controls { display: flex; align-items: center; gap: 0.4rem; }
+.qty-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--white); width: 24px; height: 24px;
+  border-radius: 2px; cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.qty-btn:hover { border-color: var(--gold); color: var(--gold); }
+.qty-num { font-family: 'Barlow Condensed'; font-weight: 700; min-width: 16px; text-align: center; }
+.remove-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 0.75rem; cursor: pointer; text-decoration: underline;
+  font-family: 'Barlow'; transition: color 0.2s;
+}
+.remove-btn:hover { color: var(--red); }
+
+.cart-footer {
+  padding: 1.5rem; border-top: 1px solid var(--border);
+  flex-shrink: 0; background: var(--bg2);
+}
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 1.2rem;
+}
+.cart-total-label { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+.cart-total-value {
+  font-family: 'Barlow Condensed'; font-size: 1.8rem;
+  font-weight: 800; color: var(--gold);
+}
+.checkout-btn {
+  width: 100%; background: var(--green); color: #fff; border: none;
+  padding: 1rem; font-family: 'Barlow Condensed'; font-size: 1.1rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  cursor: pointer; border-radius: 2px; transition: background 0.2s;
+}
+.checkout-btn:hover { background: var(--green2); }
+.clear-cart-btn {
+  width: 100%; background: transparent; color: var(--muted);
+  border: none; padding: 0.5rem; font-family: 'Barlow';
+  font-size: 0.8rem; cursor: pointer; margin-top: 0.5rem;
+  transition: color 0.2s; text-decoration: underline;
+}
+.clear-cart-btn:hover { color: var(--red); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--bg3); border: 1px solid var(--gold); color: var(--white);
+  padding: 0.7rem 1.4rem; border-radius: 4px;
+  font-family: 'Barlow Condensed'; font-size: 0.95rem; font-weight: 700;
+  z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 768px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .cart-drawer { width: 100vw; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span>🌱 Sementes premium de coleção — Breeders brasileiros</span>
+  <div id="auth-top-links"></div>
+</div>
+
+<nav>
+  <div class="nav-logo">
+    <h2>PHENO<span style="color:var(--gold);">BRASIL</span></h2>
+  </div>
+  <ul class="nav-center">
+    <li><a href="#">Sobre</a></li>
+
+    <li><a href="breeders.html">Breeders</a></li>
+    
+    <li>
+      <a href="#">Sementes <span class="arrow">▼</span></a>
+      <div class="dropdown">
+        <a href="#" onclick="window.mostrarBreeders(event)">
+          🌿 Breeders
+          <span class="dropdown-sub">Conheça quem cultiva</span>
+        </a>
+        <a href="#">
+          🧬 Tipos de Sementes
+          <span class="dropdown-sub">Fem, Auto, Regular...</span>
+        </a>
+        <a href="#">
+          🔬 Canabinoides
+          <span class="dropdown-sub">THC, CBD e mais</span>
+        </a>
+      </div>
+    </li>
+    
+    <li><a href="contato.html">Contato</a></li>
+  </ul>
+  <div class="nav-right" id="auth-nav-btn"></div>
+</nav>
+
+<div class="hero">
+  <h1>BANCO DE <span>SEMENTES</span></h1>
+  <p>As melhores genéticas nacionais criadas por profissionais de ponta.</p>
+</div>
+
+
+
+<div class="breeders-section" id="breeders-section">
+  <div class="section-head">
+    <h2>Nossos <span>Breeders</span></h2>
+    <button onclick="window.fecharBreeders()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:0.05em;">✕ Fechar</button>
+  </div>
+  <div class="breeders-grid" id="breeders-grid">
+    <p style="color:var(--muted)"></p>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="section-head">
+    <h2>Todas as <span>Genéticas</span></h2>
+  </div>
+  <div class="product-grid" id="vitrine-produtos">
+    <p style="color:var(--muted)">Carregando catálogo premium...</p>
+  </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="window.closeModal()">&times;</button>
+    <h2>Efetuar <span style="color:var(--gold);">Login</span></h2>
+    <form onsubmit="window.fazerLogin(event)">
+      <div class="form-group">
+        <label>E-mail cadastrado</label>
+        <input type="email" id="email-login" placeholder="seu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label>Senha de acesso</label>
+        <input type="password" id="pass-login" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="form-submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- BACKDROP DO CARRINHO -->
+<div class="cart-backdrop" id="cart-backdrop" onclick="window.fecharCarrinho()"></div>
+
+<!-- DRAWER CARRINHO -->
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-header">
+    <h3>🛒 Seu Carrinho</h3>
+    <button class="cart-close-btn" onclick="window.fecharCarrinho()">&times;</button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-value" id="cart-total">R$ 0,00</span>
+    </div>
+    <button class="checkout-btn" onclick="window.finalizarPedido()">Finalizar Pedido</button>
+    <button class="clear-cart-btn" onclick="window.limparCarrinho()">Esvaziar carrinho</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJTlL-4piG67VOM_y480dhyib2qaF3Bso",
+        authDomain: "phenobrasil.firebaseapp.com",
+        projectId: "phenobrasil",
+        storageBucket: "phenobrasil.firebasestorage.app",
+        messagingSenderId: "825755980394",
+        appId: "1:825755980394:web:caad888821d128fb133013"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ── CARRINHO ──────────────────────────────────────────────
+    let carrinho = JSON.parse(localStorage.getItem('pheno_cart') || '[]');
+
+    const salvarCarrinho = () => localStorage.setItem('pheno_cart', JSON.stringify(carrinho));
+
+    const mostrarToast = (msg) => {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+    };
+
+    const atualizarBadge = () => {
+        const total = carrinho.reduce((s, i) => s + i.qty, 0);
+        document.querySelectorAll('.cart-badge').forEach(b => {
+            b.textContent = total;
+            b.classList.toggle('visible', total > 0);
+        });
+    };
+
+    const renderCarrinho = () => {
+        const container = document.getElementById('cart-items');
+        const footer = document.getElementById('cart-footer');
+
+        if (carrinho.length === 0) {
+            container.innerHTML = `
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🌿</div>
+                    <p>Seu carrinho está vazio.<br>Adicione genéticas da vitrine!</p>
+                </div>`;
+            footer.style.display = 'none';
+            return;
+        }
+
+        let total = 0;
+        container.innerHTML = '';
+        carrinho.forEach((item, idx) => {
+            total += item.price * item.qty;
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <img class="cart-item-img" src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
+                <div>
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-sub">${item.type}</div>
+                    <div class="cart-item-price">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div class="cart-item-controls">
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="window.mudarQty(${idx}, -1)">−</button>
+                        <span class="qty-num">${item.qty}</span>
+                        <button class="qty-btn" onclick="window.mudarQty(${idx}, 1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="window.removerItem(${idx})">remover</button>
+                </div>`;
+            container.appendChild(div);
+        });
+
+        document.getElementById('cart-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+        footer.style.display = 'block';
+        atualizarBadge();
+    };
+
+    window.abrirCarrinho = () => {
+        renderCarrinho();
+        document.getElementById('cart-drawer').classList.add('open');
+        document.getElementById('cart-backdrop').classList.add('open');
+    };
+    window.fecharCarrinho = () => {
+        document.getElementById('cart-drawer').classList.remove('open');
+        document.getElementById('cart-backdrop').classList.remove('open');
+    };
+
+    window.adicionarAoCarrinho = (id, name, type, price, image) => {
+        const idx = carrinho.findIndex(i => i.id === id);
+        if (idx > -1) {
+            carrinho[idx].qty++;
+            mostrarToast(`+1 ${name} no carrinho`);
+        } else {
+            carrinho.push({ id, name, type, price, image, qty: 1 });
+            mostrarToast(`✅ ${name} adicionado!`);
+        }
+        salvarCarrinho();
+        atualizarBadge();
+        // Anima o botão
+        const btn = document.querySelector(`[data-product-id="${id}"]`);
+        if (btn) {
+            btn.textContent = '✓ Adicionado';
+            btn.classList.add('added');
+            setTimeout(() => {
+                btn.textContent = '+ Carrinho';
+                btn.classList.remove('added');
+            }, 1500);
+        }
+    };
+
+    window.mudarQty = (idx, delta) => {
+        carrinho[idx].qty += delta;
+        if (carrinho[idx].qty <= 0) carrinho.splice(idx, 1);
+        salvarCarrinho();
+        atualizarBadge();
+        renderCarrinho();
+    };
+
+    window.removerItem = (idx) => {
+        const nome = carrinho[idx].name;
+        carrinho.splice(idx, 1);
+        salvarCarrinho();
+        atualizarBadge();
+        renderCarrinho();
+        mostrarToast(`${nome} removido`);
+    };
+
+    window.limparCarrinho = () => {
+        carrinho = [];
+        salvarCarrinho();
+        atualizarBadge();
+        renderCarrinho();
+    };
+
+    window.finalizarPedido = () => {
+        // Ponto de extensão: conecte ao pagamento ou formulário de contato aqui
+        alert('Em breve: checkout! Por enquanto, entre em contato com o breeder.');
+    };
+
+    // ── AUTH ──────────────────────────────────────────────────
+    const buildNavBtn = (isAdmin) => {
+        const painelUrl = isAdmin ? 'admin.html' : 'breeder-dashboard.html';
+        const painelNome = isAdmin ? 'Painel Admin' : 'Meu Painel';
+        return `
+            <button class="nav-btn primary" onclick="window.location.href='${painelUrl}'">${painelNome}</button>
+            <button class="nav-btn" onclick="window.fazerLogout()">Sair</button>
+            <button class="cart-nav-btn" onclick="window.abrirCarrinho()" title="Carrinho">
+                🛒<span class="cart-badge" id="badge-nav"></span>
+            </button>`;
+    };
+
+    const buildNavGuest = () => `
+        <button class="nav-btn" onclick="window.openModal()">Entrar</button>
+        <button class="cart-nav-btn" onclick="window.abrirCarrinho()" title="Carrinho">
+            🛒<span class="cart-badge" id="badge-nav"></span>
+        </button>`;
+
+    onAuthStateChanged(auth, async (user) => {
+        const topLinks = document.getElementById('auth-top-links');
+        const navBtn = document.getElementById('auth-nav-btn');
+
+        if (user) {
+            let isAdmin = user.email === 'admin@phenobrasil.com';
+            if (!isAdmin) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const d = userDoc.data();
+                        if (d.role === 'admin' || d.tipo === 'admin') isAdmin = true;
+                    }
+                } catch(e) { console.error(e); }
+            }
+            if (topLinks) topLinks.innerHTML = `<span style="color:var(--gold)">Conectado: ${user.email}</span>`;
+            if (navBtn) navBtn.innerHTML = buildNavBtn(isAdmin);
+        } else {
+            if (topLinks) topLinks.innerHTML = `<a onclick="window.openModal()">Entrar / Login</a>`;
+            if (navBtn) navBtn.innerHTML = buildNavGuest();
+        }
+        atualizarBadge();
+    });
+
+    window.openModal = () => { document.getElementById('modal-overlay').style.display = 'flex'; };
+    window.closeModal = () => { document.getElementById('modal-overlay').style.display = 'none'; };
+
+    window.fazerLogin = async (e) => {
+        if (e) e.preventDefault();
+        const email = document.getElementById('email-login').value.trim();
+        const senha = document.getElementById('pass-login').value;
+        try {
+            const cred = await signInWithEmailAndPassword(auth, email, senha);
+            window.closeModal();
+            if (email === 'admin@phenobrasil.com') { window.location.href = 'admin.html'; return; }
+            let userDoc = await getDoc(doc(db, "users", cred.user.uid));
+            if (!userDoc.exists()) userDoc = await getDoc(doc(db, "users", email));
+            if (userDoc.exists() && (userDoc.data().role === 'admin' || userDoc.data().Role === 'admin')) {
+                window.location.href = 'admin.html'; return;
+            }
+            window.location.href = 'breeder-dashboard.html';
+        } catch (error) {
+            alert("Falha ao entrar: verifique suas credenciais. " + error.message);
+        }
+    };
+
+    window.fazerLogout = async () => {
+        try { await signOut(auth); window.location.reload(); }
+        catch (e) { alert("Erro ao sair."); }
+    };
+
+    // ── VITRINE ───────────────────────────────────────────────
+    const carregarProdutosVitrine = async () => {
+        const grid = document.getElementById('vitrine-produtos');
+        if (!grid) return;
+        try {
+            const breedersSnapshot = await getDocs(collection(db, "users"));
+            const mapaBreeders = {};
+            breedersSnapshot.forEach(uDoc => {
+                const d = uDoc.data();
+                if (d.email) mapaBreeders[d.email.toLowerCase()] = d.name;
+                mapaBreeders[uDoc.id.toLowerCase()] = d.name;
+            });
+
+            const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            grid.innerHTML = '';
+
+            if (snapshot.empty) {
+                grid.innerHTML = '<p style="color:var(--muted)">Nenhuma genética em exposição no momento.</p>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const p = docSnap.data();
+                const idBreeder = p.breederEmail || p.breeder || 'PhenoBrasil';
+                const nomeBreeder = mapaBreeders[idBreeder.toLowerCase()] || idBreeder;
+                const preco = p.price ? p.price.toFixed(2).replace('.', ',') : '0,00';
+                const precoNum = p.price || 0;
+                const imgSafe = (p.image || 'https://via.placeholder.com/250').replace(/'/g, '');
+                const nameSafe = (p.name || '').replace(/'/g, '&#39;');
+                const typeSafe = (p.type || '').replace(/'/g, '&#39;');
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div style="position:relative">
+                        <img class="product-img" src="${p.image || 'https://via.placeholder.com/250'}" alt="${p.name}">
+                        <span class="breeder-tag">${nomeBreeder}</span>
+                    </div>
+                    <div class="product-body">
+                        <div class="product-type">${p.type} • ${p.flow || ''}</div>
+                        <h3 class="product-name">${p.name}</h3>
+                        <div class="product-footer">
+                            <span class="product-price">R$ ${preco}</span>
+                            <div style="display:flex;gap:0.4rem">
+                              <button
+                                class="add-btn"
+                                data-product-id="${docSnap.id}"
+                                onclick="window.adicionarAoCarrinho('${docSnap.id}', '${nameSafe}', '${typeSafe}', ${precoNum}, '${imgSafe}')">
+                                + Carrinho
+                              </button>
+                              <a href="strain.html?id=${docSnap.id}" style="background:var(--bg3);color:var(--white);border:1px solid var(--border);padding:0.5rem 0.8rem;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;text-transform:uppercase;cursor:pointer;border-radius:2px;text-decoration:none;display:inline-flex;align-items:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--white)'">Ver</a>
+                            </div>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        } catch (error) {
+            console.error(error);
+            grid.innerHTML = '<p style="color:var(--red)">Erro ao carregar o catálogo.</p>';
+        }
+    };
+
+    carregarProdutosVitrine();
+    // ── MOSTRAR E LISTAR BREEDERS ──────────────────────────────
+    window.mostrarBreeders = async (e) => {
+
+        if (e) e.preventDefault();
+        const section = document.getElementById('breeders-section');
+        const grid = document.getElementById('breeders-grid');
+        section.classList.add('visible');
+        
+        // Busca os breeders no Firestore
+        try {
+            const snapshot = await getDocs(collection(db, "users"));
+            grid.innerHTML = '';
+            
+            snapshot.forEach(doc => {
+                const b = doc.data();
+                // Filtra apenas quem tem role ou tipo 'breeder'
+                if (b.role === 'breeder' || b.tipo === 'breeder') {
+                    const card = document.createElement('div');
+                    card.className = 'breeder-card-pub';
+                    card.innerHTML = `
+                        <img src="${b.photo || 'https://via.placeholder.com/64'}" class="breeder-card-avatar" alt="${b.name}">
+                        <div class="breeder-card-name">${b.name || 'Breeder'}</div>
+                    `;
+                    grid.appendChild(card);
+                        
+                }
+
+
+
+            });
+        }
+
+ catch (error)        
+{
+
+            grid.innerHTML = '<p style="color:var(--red)">Erro ao carregar breeders.</p>';
+        }
+
+
+// Substitua a parte onde você cria o botão dentro da função por isso:
+
+// 1. Criar o container do botão
+const divBtn = document.createElement('div');
+divBtn.style.marginBottom = '20px';
+
+// 2. Criar um LINK que parece um botão
+const btnTodos = document.createElement('a');
+btnTodos.innerText = 'Todos';
+btnTodos.className = 'btn-submit-form'; // Mantém seu estilo CSS
+btnTodos.href = 'breeders.html'; // ESSE É O COMANDO QUE ABRE O ARQUIVO
+btnTodos.style.display = 'inline-block';
+btnTodos.style.textDecoration = 'none';
+btnTodos.style.padding = '1rem 1rem';
+btnTodos.style.backgroundColor = 'var(--green)';
+btnTodos.style.color = '#000';
+btnTodos.style.fontFamily = "'Barlow Condensed', sans-serif";
+btnTodos.style.fontSize = '1.5rem';
+btnTodos.style.fontWeight = '700';
+btnTodos.style.textTransform = 'uppercase';
+btnTodos.style.borderRadius = '5px';
+btnTodos.style.transition = 'background-color 0.2s';
+
+divBtn.appendChild(btnTodos);
+grid.appendChild(divBtn); // Adiciona o botão no topo da grade
+    };
+
+    window.fecharBreeders = () => {
+        document.getElementById('breeders-section').classList.remove('visible');
+    };
+</script>
+</body>
+</html>

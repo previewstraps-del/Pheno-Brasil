@@ -1,0 +1,16 @@
+<div class="breeders-grid">
+    </div>
+
+<script type="module">
+    // Ao carregar a página, busca todos os usuários com tipo 'breeder'
+    const q = query(collection(db, "users"), where("role", "==", "breeder"));
+    const snapshot = await getDocs(q);
+    
+    snapshot.forEach(doc => {
+        const b = doc.data();
+        const card = document.createElement('a');
+        card.href = `breeder-strains.html?id=${doc.id}`; // Leva para a página de strains dele
+        card.innerHTML = `<div><img src="${b.photo}"><h3>${b.name}</h3></div>`;
+        document.querySelector('.breeders-grid').appendChild(card);
+    });
+</script>

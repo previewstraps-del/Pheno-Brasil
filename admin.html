@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo – PhenoBrasil</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d0d;
+  --bg2: #141414;
+  --bg3: #1c1c1c;
+  --border: #2a2a2a;
+  --gold: #c9a84c;
+  --green: #3a7d44;
+  --green2: #4caf50;
+  --white: #f0ede8;
+  --muted: #888;
+  --red: #e05252;
+}
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+nav { background: #070707; border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; border-top: 3px solid var(--red); }
+.nav-logo h2 { font-family: 'Barlow Condensed'; font-weight: 800; letter-spacing: 1px; }
+.nav-actions { display: flex; align-items: center; gap: 1rem; }
+.nav-link-btn { background: transparent; border: 1px solid var(--border); color: var(--white); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; text-decoration: none; font-size: 0.9rem; border-radius: 2px; }
+.nav-link-btn:hover { border-color: var(--gold); color: var(--gold); }
+.logout-btn { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; transition: all 0.2s; border-radius: 2px; }
+.logout-btn:hover { background: var(--red); color: #fff; }
+
+.admin-container { max-width: 1250px; margin: 3rem auto; padding: 0 2rem; }
+.admin-grid { display: grid; grid-template-columns: 1.5fr 1.5fr; gap: 3rem; }
+@media (max-width: 992px) { .admin-grid { grid-template-columns: 1fr; } }
+
+.card-box { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; border-radius: 4px; margin-bottom: 2rem; }
+.card-box h3 { font-family: 'Barlow Condensed'; font-size: 1.6rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 0.05em; color: var(--gold); }
+
+/* FORMULÁRIOS */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+.form-group input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--white); padding: 0.65rem 1rem; font-size: 0.9rem; outline: none; border-radius: 2px; font-family: 'Barlow'; }
+.form-group input:focus { border-color: var(--gold); }
+.btn-submit-form { background: var(--green); color: #fff; border: none; padding: 0.75rem 1rem; font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 2px; width: 100%; letter-spacing: 0.05em; }
+.btn-submit-form:hover { background: var(--green2); }
+
+/* TABELA DE PRODUTOS */
+.admin-table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 1rem; }
+.admin-table th { font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; color: var(--muted); padding: 0.75rem 1rem; border-bottom: 2px solid var(--border); font-size: 0.95rem; }
+.admin-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+.admin-table tr:hover { background: var(--bg3); }
+
+.badge-breeder { background: #222; color: var(--white); padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 2px; border: 1px solid var(--border); }
+.action-group { display: flex; gap: 0.4rem; }
+.btn-action { border: none; padding: 0.35rem 0.7rem; font-family: 'Barlow Condensed'; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: opacity 0.2s; }
+.btn-action:hover { opacity: 0.85; }
+.btn-delete { background: var(--red); color: #fff; }
+
+/* LISTA DE BREEDERS */
+.user-item { background: var(--bg3); border: 1px solid var(--border); padding: 1rem; border-radius: 2px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 1rem; }
+.user-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); background: #222; }
+.user-info { flex-grow: 1; }
+.user-info h4 { font-size: 1rem; font-weight: 700; color: var(--white); text-transform: uppercase; }
+.user-info p { font-size: 0.8rem; color: var(--muted); margin-top: 0.1rem; }
+.user-controls { display: flex; gap: 0.5rem; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--gold); width: 100%; max-width: 400px; padding: 2.5rem; position: relative; border-radius: 4px; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <h2>PAINEL <span style="color:var(--red);">ADMINISTRATIVO</span></h2>
+  </div>
+  <div class="nav-actions">
+    <a href="index.html" class="nav-link-btn">🏠 Ir para Loja</a>
+    <button class="logout-btn" onclick="window.fazerLogout()">Sair do Admin</button>
+  </div>
+</nav>
+
+<div class="admin-container">
+  <div class="admin-grid">
+    
+    <div>
+      <div class="card-box">
+        <h3>Moderação Global de Genéticas</h3>
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Strain / Nome</th>
+                <th>Breeder Proprietário</th>
+                <th>Tipo</th>
+                <th>Preço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="master-products-list">
+              <tr>
+                <td colspan="5" style="color:var(--muted); text-align:center;">Carregando banco de dados global...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card-box">
+        <h3>+ Adicionar Novo Breeder</h3>
+        <form onsubmit="window.adicionarBreederNovo(event)">
+          <div class="form-group">
+            <label>Nome do Breeder / Coletivo</label>
+            <input type="text" id="new-breeder-name" placeholder="Ex: Pheno Genetics Brasil" required>
+          </div>
+          <div class="form-group">
+            <label>E-mail de Acesso</label>
+            <input type="email" id="new-breeder-email" placeholder="breeder@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Link da Foto / Logo (URL) - Opcional</label>
+            <input type="text" id="new-breeder-photo" placeholder="https://linkdafoto.com/logo.jpg">
+          </div>
+          <button type="submit" class="btn-submit-form">Cadastrar Breeder</button>
+        </form>
+      </div>
+
+      <div class="card-box">
+        <h3>Breeders Cadastrados</h3>
+        <div id="master-users-list">
+          <p style="color:var(--muted)">Carregando breeders cadastrados...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-user-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="window.fecharModalEdicao()">&times;</button>
+    <h3 style="font-family:'Barlow Condensed'; font-size:1.5rem; text-transform:uppercase; margin-bottom:1.5rem; color:var(--gold);">Editar Cadastro do Breeder</h3>
+    <form onsubmit="window.salvarEdicaoUsuario(event)">
+      <input type="hidden" id="edit-uid">
+      <div class="form-group">
+        <label>Nome do Breeder</label>
+        <input type="text" id="edit-name" required>
+      </div>
+      <div class="form-group">
+        <label>E-mail do Breeder</label>
+        <input type="email" id="edit-email" required>
+      </div>
+      <div class="form-group">
+        <label>Link da Foto / Logo (URL) - Opcional</label>
+        <input type="text" id="edit-photo">
+      </div>
+      <button type="submit" class="btn-submit-form">Salvar Alterações</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+      apiKey: "AIzaSyAJTlL-4piG67VOM_y480dhyib2qaF3Bso",
+      authDomain: "phenobrasil.firebaseapp.com",
+      projectId: "phenobrasil",
+      storageBucket: "phenobrasil.firebasestorage.app",
+      messagingSenderId: "825755980394",
+      appId: "1:825755980394:web:caad888821d128fb133013"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let executandoLogout = false;
+  let listaUsuariosLocais = []; 
+
+  // Trava de segurança robusta e anti-F5 exclusiva para o admin@phenobrasil.com
+  onAuthStateChanged(auth, async (user) => {
+      if (user) {
+          if (!user.email) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+          }
+
+          // Segurança Máxima: Só entra se for o e-mail master do admin
+          if (user.email === 'admin@phenobrasil.com') {
+              window.carregarTodasStrains();
+              window.carregarTodosBreeders();
+              return;
+          }
+
+          alert("Acesso negado: Área restrita ao Administrador Supremo.");
+          window.location.href = 'index.html';
+      } else {
+          if (!executandoLogout) window.location.href = 'index.html';
+      }
+  });
+
+  window.fazerLogout = async () => {
+      try {
+          executandoLogout = true;
+          await signOut(auth);
+          window.location.href = 'index.html';
+      } catch (error) {
+          executandoLogout = false;
+          alert("Erro ao deslogar.");
+      }
+  };
+
+  /* ================= CONTROLE DE STRAINS / PRODUTOS (COM BUSCA DE NOME DO BREEDER) ================= */
+  window.carregarTodasStrains = async () => {
+      const tbody = document.getElementById('master-products-list');
+      try {
+          // 1. Busca todos os usuários do tipo breeder primeiro para termos uma lista de nomes na memória
+          const breedersSnapshot = await getDocs(collection(db, "users"));
+          const mapaBreeders = {};
+          
+          breedersSnapshot.forEach(uDoc => {
+              const dadosUser = uDoc.data();
+              // Guarda o nome associando tanto ao e-mail quanto ao próprio ID do documento
+              if (dadosUser.email) {
+                  mapaBreeders[dadosUser.email.toLowerCase()] = dadosUser.name;
+              }
+              mapaBreeders[uDoc.id.toLowerCase()] = dadosUser.name;
+          });
+
+          // 2. Busca todas as genéticas do banco
+          const querySnapshot = await getDocs(collection(db, "products"));
+          tbody.innerHTML = '';
+
+          if (querySnapshot.empty) {
+              tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted); text-align:center;">Nenhum produto cadastrado no sistema.</td></tr>';
+              return;
+          }
+
+          querySnapshot.forEach((productDoc) => {
+              const item = productDoc.data();
+              
+              // Identifica o termo do breeder salvo na semente (pode ser e-mail ou nome)
+              const identificadorBreeder = item.breederEmail || item.breeder || 'Desconhecido';
+              
+              // Tenta encontrar o Nome oficial correspondente na nossa lista de usuários
+              const nomeExibicaoBreeder = mapaBreeders[identificadorBreeder.toLowerCase()] || identificadorBreeder;
+
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                  <td style="font-weight:600; text-transform:uppercase;">${item.name}</td>
+                  <td><span class="badge-breeder">${nomeExibicaoBreeder}</span></td>
+                  <td>${item.type} • ${item.flow || ''}</td>
+                  <td style="color:var(--gold); font-weight:bold;">R$ ${item.price ? item.price.toFixed(2).replace('.',',') : '0,00'}</td>
+                  <td>
+                      <div class="action-group">
+                          <button class="btn-action btn-delete" onclick="window.deletarStrainMaster('${productDoc.id}')">Excluir</button>
+                      </div>
+                  </td>
+              `;
+              tbody.appendChild(tr);
+          });
+      } catch (error) {
+          console.error(error);
+          tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red);">Erro ao ler banco de dados de produtos.</td></tr>';
+      }
+  };
+
+  window.deletarStrainMaster = async (id) => {
+      if(confirm("Tem certeza que deseja apagar permanentemente esta strain do catálogo público?")) {
+          try {
+              await deleteDoc(doc(db, "products", id));
+              alert("Produto removido com sucesso!");
+              window.carregarTodasStrains();
+          } catch (error) {
+              alert("Erro ao deletar: " + error.message);
+          }
+      }
+  };
+
+
+  /* ================= CONTROLE COMPLETO E EXCLUSIVO DE BREEDERS ================= */
+ // FUNÇÃO DE ADICIONAR BREEDER (Salva exatamente o que for digitado)
+ /* ================= CONTROLE COMPLETO E EXCLUSIVO DE BREEDERS ================= */
+window.adicionarBreederNovo = async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('new-breeder-name').value.trim();
+      const email = document.getElementById('new-breeder-email').value.trim();
+      const foto = document.getElementById('new-breeder-photo').value.trim();
+      const senhaPadrao = "Pheno2026!";
+
+      try {
+          const { initializeApp, getApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+          const { getAuth, createUserWithEmailAndPassword, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+
+          // Cria uma instância separada só para registrar, sem afetar o Admin logado
+          let secondaryApp;
+          try { secondaryApp = getApp("SecondaryRegisterApp"); } 
+          catch (e) { secondaryApp = initializeApp(firebaseConfig, "SecondaryRegisterApp"); }
+          
+          const secondaryAuth = getAuth(secondaryApp);
+          const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senhaPadrao);
+          const uid = userCredential.user.uid;
+
+          // Fecha a sessão apenas na instância secundária
+          await signOut(secondaryAuth);
+
+          // Salva no Firestore
+          await setDoc(doc(db, "users", uid), {
+              uid: uid, name: nome, email: email, photo: foto, role: 'breeder'
+          });
+          
+          alert("Breeder cadastrado com sucesso!");
+          window.carregarTodosBreeders();
+      } catch (error) {
+          alert("Erro: " + error.message);
+      }
+  };
+  window.carregarTodosBreeders = async () => {
+      const container = document.getElementById('master-users-list');
+      try {
+          const querySnapshot = await getDocs(collection(db, "users"));
+          container.innerHTML = '';
+          listaUsuariosLocais = [];
+
+          let possuiBreeders = false;
+
+          querySnapshot.forEach((userDoc) => {
+              const u = userDoc.data();
+              const cargo = u.role || u.Role;
+              
+              if (cargo === 'breeder') {
+                  possuiBreeders = true;
+                  listaUsuariosLocais.push({ uid: userDoc.id, ...u });
+
+                  // SE TIVER FOTO: Mostra a tag <img>. SE NÃO TIVER: Mostra o círculo com a inicial
+                  let elementoAvatar = '';
+                  if (u.photo && u.photo.trim() !== "") {
+                      elementoAvatar = `<img class="user-avatar" src="${u.photo}" alt="Logo">`;
+                  } else {
+                      const inicial = u.name ? u.name.charAt(0).toUpperCase() : 'B';
+                      elementoAvatar = `<div class="user-avatar" style="background:#333; color:var(--gold); display:flex; align-items:center; justify-content:center; font-family:'Barlow Condensed'; font-weight:700; font-size:1.4rem;">${inicial}</div>`;
+                  }
+
+                  const div = document.createElement('div');
+                  div.className = 'user-item';
+                  div.innerHTML = `
+                      ${elementoAvatar}
+                      <div class="user-info">
+                          <h4>${u.name || 'Sem Nome'}</h4>
+                          <p>${u.email}</p>
+                      </div>
+                      <div class="user-controls">
+                          <button class="btn-action btn-edit" onclick="window.abrirModalEdicao('${userDoc.id}')">Editar</button>
+                          <button class="btn-action btn-delete" onclick="window.deletarUsuarioMaster('${userDoc.id}')">Excluir</button>
+                      </div>
+                  `;
+                  container.appendChild(div);
+              }
+          });
+
+          if(!possuiBreeders) {
+              container.innerHTML = '<p style="color:var(--muted)">Nenhum breeder cadastrado no sistema ainda.</p>';
+          }
+      } catch (error) {
+          container.innerHTML = '<p style="color:var(--red)">Erro ao carregar lista de breeders.</p>';
+      }
+  };
+
+  // FUNÇÃO DE LISTAR BREEDERS (Filtra para trazer apenas quem for role == breeder)
+  window.carregarTodosBreeders = async () => {
+      const container = document.getElementById('master-users-list');
+      try {
+          // Traz apenas usuários cujo cargo seja 'breeder'
+          const q = query(collection(db, "users"), where("role", "==", "breeder"));
+          const querySnapshot = await getDocs(q);
+          container.innerHTML = '';
+          listaUsuariosLocais = [];
+
+          if(querySnapshot.empty) {
+              container.innerHTML = '<p style="color:var(--muted)">Nenhum breeder cadastrado no sistema ainda.</p>';
+              return;
+          }
+
+          querySnapshot.forEach((userDoc) => {
+              const u = userDoc.data();
+              listaUsuariosLocais.push({ uid: userDoc.id, ...u });
+
+              const fotoExibicao = u.photo || 'https://via.placeholder.com/50';
+
+              const div = document.createElement('div');
+              div.className = 'user-item';
+              div.innerHTML = `
+                  <img class="user-avatar" src="${fotoExibicao}" alt="Logo">
+                  <div class="user-info">
+                      <h4>${u.name || 'Sem Nome'}</h4>
+                      <p>${u.email}</p>
+                  </div>
+                  <div class="user-controls">
+                      <button class="btn-action btn-edit" onclick="window.abrirModalEdicao('${userDoc.id}')">Editar</button>
+                      <button class="btn-action btn-delete" onclick="window.deletarUsuarioMaster('${userDoc.id}')">Excluir</button>
+                  </div>
+              `;
+              container.appendChild(div);
+          });
+      } catch (error) {
+          container.innerHTML = '<p style="color:var(--red)">Erro ao carregar lista de breeders.</p>';
+      }
+  };
+
+  // MODAL DE EDIÇÃO
+  window.abrirModalEdicao = (uid) => {
+      const usuario = listaUsuariosLocais.find(u => u.uid === uid);
+      if(!usuario) return;
+
+      document.getElementById('edit-uid').value = usuario.uid;
+      document.getElementById('edit-name').value = usuario.name || '';
+      document.getElementById('edit-email').value = usuario.email;
+      document.getElementById('edit-photo').value = usuario.photo || '';
+      document.getElementById('edit-user-modal').style.display = 'flex';
+  };
+
+  window.fecharModalEdicao = () => {
+      document.getElementById('edit-user-modal').style.display = 'none';
+  };
+
+  window.salvarEdicaoUsuario = async (e) => {
+      e.preventDefault();
+      const uid = document.getElementById('edit-uid').value;
+      const novoNome = document.getElementById('edit-name').value.trim();
+      const novoEmail = document.getElementById('edit-email').value.trim();
+      const novaFoto = document.getElementById('edit-photo').value.trim();
+
+      try {
+          await setDoc(doc(db, "users", uid), { 
+              name: novoNome,
+              email: novoEmail, 
+              photo: novaFoto // Se estiver em branco, salva em branco
+          }, { merge: true });
+          
+          alert("Cadastro do breeder atualizado!");
+          window.fecharModalEdicao();
+          window.carregarTodosBreeders();
+      } catch(error) {
+          alert("Erro ao salvar edições: " + error.message);
+      }
+  };
+
+  // EXCLUSÃO DO BREEDER
+  window.deletarUsuarioMaster = async (idDocumento) => {
+      if(confirm("Deseja realmente remover este breeder do sistema? Ele perderá todos os acessos imediatamente.")) {
+          try {
+              await deleteDoc(doc(db, "users", idDocumento));
+              alert("Breeder removido!");
+              window.carregarTodosBreeders();
+          } catch (error) {
+              alert("Erro ao excluir: " + error.message);
+          }
+      }
+  };
+</script>
+</body>
+</html>

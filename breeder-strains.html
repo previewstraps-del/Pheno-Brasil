@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breeder – PhenoBrasil</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d0d; --bg2: #141414; --bg3: #1c1c1c;
+  --border: #2a2a2a; --gold: #c9a84c;
+  --green: #3a7d44; --green2: #4caf50; --white: #f0ede8; --muted: #888; --red: #e05252;
+}
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+nav { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-family: 'Barlow Condensed'; font-weight: 800; font-size: 1.3rem; letter-spacing: 1px; text-decoration: none; color: var(--white); }
+.nav-logo span { color: var(--gold); }
+.nav-back { background: transparent; border: 1px solid var(--border); color: var(--white); padding: 0.45rem 1rem; font-family: 'Barlow Condensed'; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s; }
+.nav-back:hover { border-color: var(--gold); color: var(--gold); }
+
+/* HERO DO BREEDER */
+.breeder-hero {
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a2a1a 50%, #0d0d0d 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 2rem;
+}
+.breeder-hero-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; gap: 2rem;
+}
+.breeder-hero-avatar {
+  width: 100px; height: 100px; border-radius: 50%;
+  object-fit: cover; border: 3px solid var(--gold);
+  background: var(--bg3); flex-shrink: 0;
+}
+.breeder-hero-info h1 {
+  font-family: 'Barlow Condensed'; font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; text-transform: uppercase; line-height: 1;
+}
+.breeder-hero-info h1 span { color: var(--gold); }
+.breeder-hero-badge {
+  display: inline-block; background: var(--green); color: #fff;
+  font-family: 'Barlow Condensed'; font-size: 0.75rem; font-weight: 700;
+  padding: 0.2rem 0.7rem; text-transform: uppercase; border-radius: 2px;
+  margin-top: 0.6rem;
+}
+.breeder-hero-count { color: var(--muted); font-size: 0.9rem; margin-top: 0.4rem; }
+
+/* GRID */
+.main-wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.section-head h2 { font-family: 'Barlow Condensed'; font-size: 1.8rem; font-weight: 800; text-transform: uppercase; }
+.section-head h2 span { color: var(--gold); }
+
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.product-card { background: var(--bg2); border: 1px solid var(--border); transition: all 0.2s; position: relative; overflow: hidden; border-radius: 4px; }
+.product-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.product-img { width: 100%; height: 240px; object-fit: cover; display: block; }
+.product-body { padding: 1.2rem; }
+.product-type { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.3rem; }
+.product-name { font-family: 'Barlow Condensed'; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.8rem; }
+.product-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
+.product-price { font-family: 'Barlow Condensed'; font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+.add-btn { background: var(--green); color: #fff; border: none; padding: 0.5rem 1rem; font-family: 'Barlow Condensed'; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+.add-btn:hover { background: var(--green2); }
+.add-btn.added { background: var(--gold); color: #000; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--bg3); border: 1px solid var(--gold); color: var(--white); padding: 0.7rem 1.4rem; border-radius: 4px; font-family: 'Barlow Condensed'; font-size: 0.95rem; font-weight: 700; z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 768px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .breeder-hero-inner { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">PHENO<span>BRASIL</span></a>
+  <a class="nav-back" href="index.html">← Voltar</a>
+</nav>
+
+<!-- HERO DO BREEDER -->
+<div class="breeder-hero">
+  <div class="breeder-hero-inner" id="breeder-hero-inner">
+    <img class="breeder-hero-avatar" id="b-avatar" src="" alt="">
+    <div class="breeder-hero-info">
+      <h1 id="b-nome">Carregando...</h1>
+      <div class="breeder-hero-badge">✅ Breeder Verificado</div>
+      <div class="breeder-hero-count" id="b-count"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STRAINS -->
+<div class="main-wrap">
+  <div class="section-head">
+    <h2>Genéticas de <span id="b-nome-titulo">...</span></h2>
+  </div>
+  <div class="product-grid" id="strains-grid">
+    <p style="color:var(--muted)">Carregando...</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAJTlL-4piG67VOM_y480dhyib2qaF3Bso",
+    authDomain: "phenobrasil.firebaseapp.com",
+    projectId: "phenobrasil",
+    storageBucket: "phenobrasil.firebasestorage.app",
+    messagingSenderId: "825755980394",
+    appId: "1:825755980394:web:caad888821d128fb133013"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  const breederId = new URLSearchParams(window.location.search).get('id');
+
+  const mostrarToast = (msg) => {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  };
+
+  const carregar = async () => {
+    if (!breederId) { document.getElementById('strains-grid').innerHTML = '<p style="color:var(--red)">Breeder não encontrado.</p>'; return; }
+
+    // Dados do breeder
+    try {
+      const uSnap = await getDoc(doc(db, "users", breederId));
+      if (uSnap.exists()) {
+        const u = uSnap.data();
+        const nome = u.name || 'Breeder';
+        document.title = `${nome} – PhenoBrasil`;
+        document.getElementById('b-nome').textContent = nome;
+        document.getElementById('b-nome-titulo').textContent = nome;
+        document.getElementById('b-avatar').src = u.photo ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=3a7d44&color=fff&size=128`;
+      }
+    } catch(_) {}
+
+    // Strains do breeder
+    const grid = document.getElementById('strains-grid');
+    try {
+      const q = query(collection(db, "products"), where("breederUid", "==", breederId));
+      const snap = await getDocs(q);
+
+      document.getElementById('b-count').textContent = `${snap.size} strain${snap.size !== 1 ? 's' : ''} cadastrada${snap.size !== 1 ? 's' : ''}`;
+
+      if (snap.empty) { grid.innerHTML = '<p style="color:var(--muted)">Nenhuma strain cadastrada.</p>'; return; }
+
+      grid.innerHTML = '';
+      snap.forEach(docSnap => {
+        const p = docSnap.data();
+        const preco = p.price ? p.price.toFixed(2).replace('.', ',') : '0,00';
+        const precoNum = p.price || 0;
+        const imgSafe = (p.image || 'https://via.placeholder.com/250').replace(/'/g, '');
+        const nameSafe = (p.name || '').replace(/'/g, '&#39;');
+        const typeSafe = (p.type || '').replace(/'/g, '&#39;');
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img class="product-img" src="${p.image || 'https://via.placeholder.com/250'}" alt="${p.name}">
+          <div class="product-body">
+            <div class="product-type">${p.type} • ${p.flow || ''}${p.thc ? ' • THC ' + p.thc : ''}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <div class="product-footer">
+              <span class="product-price">R$ ${preco}</span>
+              <div style="display:flex;gap:0.4rem">
+                <button class="add-btn" data-product-id="${docSnap.id}"
+                  onclick="window.addCart('${docSnap.id}','${nameSafe}','${typeSafe}',${precoNum},'${imgSafe}')">
+                  + Carrinho
+                </button>
+                <a href="strain.html?id=${docSnap.id}" style="background:var(--bg3);color:var(--white);border:1px solid var(--border);padding:0.5rem 0.8rem;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;font-weight:700;text-transform:uppercase;border-radius:2px;text-decoration:none;display:inline-flex;align-items:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--white)'">Ver</a>
+              </div>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    } catch(e) {
+      console.error(e);
+      grid.innerHTML = '<p style="color:var(--red)">Erro ao carregar strains.</p>';
+    }
+  };
+
+  window.addCart = (id, name, type, price, image) => {
+    const carrinho = JSON.parse(localStorage.getItem('pheno_cart') || '[]');
+    const idx = carrinho.findIndex(i => i.id === id);
+    if (idx > -1) { carrinho[idx].qty++; mostrarToast(`+1 ${name} no carrinho`); }
+    else { carrinho.push({ id, name, type, price, image, qty: 1 }); mostrarToast(`✅ ${name} adicionado!`); }
+    localStorage.setItem('pheno_cart', JSON.stringify(carrinho));
+    const btn = document.querySelector(`[data-product-id="${id}"]`);
+    if (btn) {
+      btn.textContent = '✓ Adicionado'; btn.classList.add('added');
+      setTimeout(() => { btn.textContent = '+ Carrinho'; btn.classList.remove('added'); }, 1500);
+    }
+  };
+
+  carregar();
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel do Breeder – PhenoBrasil</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d0d; --bg2: #141414; --bg3: #1c1c1c;
+  --border: #2a2a2a; --gold: #c9a84c; --green: #3a7d44;
+  --green2: #4caf50; --white: #f0ede8; --muted: #888; --red: #e05252;
+}
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+nav { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; }
+.nav-logo h2 { font-family: 'Barlow Condensed'; font-weight: 800; letter-spacing: 1px; }
+.nav-actions { display: flex; align-items: center; gap: 1rem; }
+.nav-link-btn { background: transparent; border: 1px solid var(--border); color: var(--white); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; border-radius: 2px; }
+.nav-link-btn:hover { border-color: var(--gold); color: var(--gold); }
+.logout-btn { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Barlow Condensed'; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; border-radius: 2px; }
+.logout-btn:hover { background: var(--red); color: #fff; }
+
+.dashboard-container { max-width: 1100px; margin: 3rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 1.3fr; gap: 3rem; }
+@media (max-width: 900px) { .dashboard-container { grid-template-columns: 1fr; } }
+
+.card-box { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; border-radius: 4px; border-top: 3px solid var(--gold); height: fit-content; }
+.card-box h3 { font-family: 'Barlow Condensed'; font-size: 1.6rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 0.05em; }
+
+.form-group { margin-bottom: 1.2rem; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 0.05em; }
+.form-group input,
+.form-group select,
+.form-group textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--white); padding: 0.75rem 1rem; font-family: 'Barlow', sans-serif; font-size: 0.9rem; outline: none; border-radius: 2px; }
+.form-group textarea { resize: vertical; min-height: 90px; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+.section-divider { font-family: 'Barlow Condensed'; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 0.1em; margin: 1.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+
+.tag-input-wrap { display: flex; flex-wrap: wrap; gap: 0.4rem; background: var(--bg3); border: 1px solid var(--border); padding: 0.5rem; border-radius: 2px; min-height: 44px; align-items: center; cursor: text; }
+.tag-input-wrap:focus-within { border-color: var(--gold); }
+.tag { background: var(--bg2); border: 1px solid var(--border); color: var(--white); padding: 0.2rem 0.6rem; border-radius: 2px; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem; }
+.tag-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0; }
+.tag-remove:hover { color: var(--red); }
+.tag-input { background: none; border: none; color: var(--white); font-family: 'Barlow', sans-serif; font-size: 0.9rem; outline: none; min-width: 120px; flex: 1; padding: 0.1rem 0.2rem; }
+
+.submit-btn { width: 100%; background: var(--green); color: #fff; border: none; padding: 0.9rem; font-family: 'Barlow Condensed'; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; border-radius: 2px; }
+.submit-btn:hover { background: var(--green2); }
+.cancel-btn { width: 100%; background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 0.6rem; font-family: 'Barlow Condensed'; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem; display: none; border-radius: 2px; }
+
+.product-item { background: var(--bg3); border: 1px solid var(--border); padding: 1rem; border-radius: 2px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.product-info h4 { font-family: 'Barlow Condensed'; font-size: 1.15rem; font-weight: 700; text-transform: uppercase; }
+.product-info p { color: var(--muted); font-size: 0.85rem; }
+.product-meta { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+.price-tag { color: var(--gold); font-weight: 700; font-family: 'Barlow Condensed'; font-size: 1.1rem; }
+.edit-btn { background: var(--gold); color: #000; border: none; padding: 0.3rem 0.8rem; font-family: 'Barlow Condensed'; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: opacity 0.2s; }
+.edit-btn:hover { opacity: 0.9; }
+.del-btn { background: transparent; color: var(--red); border: 1px solid var(--red); padding: 0.3rem 0.8rem; font-family: 'Barlow Condensed'; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+.del-btn:hover { background: var(--red); color: #fff; }
+</style>
+</head>
+
+<!-- MODAL PERFIL -->
+<div id="modal-perfil" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
+  <div class="card-box" style="max-width:400px; width:90%; position:relative;">
+    <button onclick="window.fecharModalPerfil()" style="position:absolute;top:15px;right:15px;background:transparent;border:none;color:var(--white);font-size:1.5rem;cursor:pointer;">&times;</button>
+    <h3 style="color:var(--gold);margin-bottom:15px;">Editar Perfil</h3>
+    <form id="form-perfil" onsubmit="window.salvarPerfil(event)">
+      <div class="form-group"><label>Nome</label><input type="text" id="perfil-nome"></div>
+      <div class="form-group"><label>Foto (URL)</label><input type="url" id="perfil-foto"></div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:15px 0;">
+      <p style="font-size:0.8rem;color:var(--muted);">Alterar senha:</p>
+      <div class="form-group"><label>Senha Atual</label><input type="password" id="current-pass"></div>
+      <div class="form-group"><label>Nova Senha</label><input type="password" id="new-pass"></div>
+      <div class="form-group"><label>Confirmar Nova Senha</label><input type="password" id="confirm-pass"></div>
+      <button type="submit" class="submit-btn" style="margin-top:10px;">Salvar Alterações</button>
+      <button type="button" class="cancel-btn" style="display:block;margin-top:10px;border-color:var(--red);color:var(--red);" onclick="window.fecharModalPerfil()">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<body>
+<nav>
+  <div class="nav-logo">
+    <h2>PAINEL DO <span style="color:var(--gold);">BREEDER</span></h2>
+  </div>
+  <div class="nav-actions">
+    <a href="index.html" class="nav-link-btn">🏠 Página Inicial</a>
+    <button class="nav-link-btn" onclick="window.abrirModalPerfil()" style="border-color:var(--gold);color:var(--gold);">⚙️ Meu Perfil</button>
+    <button class="logout-btn" onclick="window.fazerLogout()">Sair do Painel</button>
+  </div>
+</nav>
+
+<div class="dashboard-container">
+  <!-- FORMULÁRIO -->
+  <div class="card-box">
+    <h3 id="form-title">Nova Strain</h3>
+    <form id="product-form" onsubmit="window.salvarProduto(event)">
+      <input type="hidden" id="prod-id">
+
+      <div class="section-divider">Informações Básicas</div>
+      <div class="form-group">
+        <label>Nome da Strain</label>
+        <input type="text" id="prod-name" placeholder="Ex: Tropicana Cookies" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Semente</label>
+          <select id="prod-type">
+            <option value="Feminizada">Feminizada</option>
+            <option value="Automática">Automática</option>
+            <option value="Regular">Regular</option>
+            <option value="Fast Version">Fast Version</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Floração</label>
+          <input type="text" id="prod-flow" placeholder="Ex: 8-9 Semanas" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Preço (R$)</label>
+        <input type="number" id="prod-price" placeholder="Ex: 150" required>
+      </div>
+      <div class="form-group">
+        <label>URL da Imagem</label>
+        <input type="url" id="prod-image" placeholder="https://exemplo.com/foto.jpg">
+      </div>
+
+      <div class="section-divider">Genética & Potência</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Genitor Pai ♂</label>
+          <input type="text" id="prod-pai" placeholder="Ex: OG Kush">
+        </div>
+        <div class="form-group">
+          <label>Genitor Mãe ♀</label>
+          <input type="text" id="prod-mae" placeholder="Ex: Gelato">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>THC (%)</label>
+          <input type="text" id="prod-thc" placeholder="Ex: 22-26%">
+        </div>
+        <div class="form-group">
+          <label>CBD (%)</label>
+          <input type="text" id="prod-cbd" placeholder="Ex: &lt;1%">
+        </div>
+      </div>
+
+      <div class="section-divider">Produção & Perfil</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Produção Indoor</label>
+          <input type="text" id="prod-indoor" placeholder="Ex: 500g/m²">
+        </div>
+        <div class="form-group">
+          <label>Produção Outdoor</label>
+          <input type="text" id="prod-outdoor" placeholder="Ex: 800g/planta">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Efeitos (Enter para adicionar)</label>
+        <div class="tag-input-wrap" id="wrap-efeitos" onclick="document.getElementById('input-efeitos').focus()">
+          <input class="tag-input" id="input-efeitos" placeholder="Ex: Relaxante...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Aromas (Enter para adicionar)</label>
+        <div class="tag-input-wrap" id="wrap-aromas" onclick="document.getElementById('input-aromas').focus()">
+          <input class="tag-input" id="input-aromas" placeholder="Ex: Cítrico...">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea id="prod-desc" placeholder="Conte a história desta strain, suas características únicas, dicas de cultivo..."></textarea>
+      </div>
+
+      <button type="submit" id="btn-submit-text" class="submit-btn">Adicionar à Vitrine</button>
+      <button type="button" id="btn-cancel-edit" class="cancel-btn" onclick="window.cancelarEdicao()">Cancelar Edição</button>
+    </form>
+  </div>
+
+  <!-- LISTA -->
+  <div class="card-box">
+    <h3>Minhas Genéticas</h3>
+    <div id="products-list">
+      <p style="color:var(--muted)">Carregando...</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, query, where, getDocs, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAJTlL-4piG67VOM_y480dhyib2qaF3Bso",
+    authDomain: "phenobrasil.firebaseapp.com",
+    projectId: "phenobrasil",
+    storageBucket: "phenobrasil.firebasestorage.app",
+    messagingSenderId: "825755980394",
+    appId: "1:825755980394:web:caad888821d128fb133013"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let usuarioAtual = null;
+  let produtosLocais = [];
+  let executandoLogout = false;
+  let tagsEfeitos = [];
+  let tagsAromas = [];
+
+  // ── TAGS (efeitos / aromas) ───────────────────────────────
+  const setupTagInput = (inputId, wrapId, arr) => {
+    const input = document.getElementById(inputId);
+    const wrap  = document.getElementById(wrapId);
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+        e.preventDefault();
+        const val = input.value.trim().replace(/,/g, '');
+        if (val && !arr.includes(val)) {
+          arr.push(val);
+          renderTags(wrapId, inputId, arr);
+        }
+        input.value = '';
+      }
+      if (e.key === 'Backspace' && !input.value && arr.length) {
+        arr.pop();
+        renderTags(wrapId, inputId, arr);
+      }
+    });
+  };
+
+  const renderTags = (wrapId, inputId, arr) => {
+    const wrap  = document.getElementById(wrapId);
+    const input = document.getElementById(inputId);
+    wrap.innerHTML = '';
+    arr.forEach((t, i) => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.innerHTML = `${t}<button class="tag-remove" type="button">&times;</button>`;
+      span.querySelector('button').onclick = () => { arr.splice(i, 1); renderTags(wrapId, inputId, arr); };
+      wrap.appendChild(span);
+    });
+    wrap.appendChild(input);
+  };
+
+  const loadTags = (arr, values) => { arr.length = 0; (values || []).forEach(v => arr.push(v)); };
+
+  setupTagInput('input-efeitos', 'wrap-efeitos', tagsEfeitos);
+  setupTagInput('input-aromas',  'wrap-aromas',  tagsAromas);
+
+  // ── AUTH ─────────────────────────────────────────────────
+  onAuthStateChanged(auth, (user) => {
+    if (user) { usuarioAtual = user; window.carregarProdutosDoBreeder(); }
+    else { if (!executandoLogout) window.location.href = 'index.html'; }
+  });
+
+  // ── PRODUTO: SALVAR ──────────────────────────────────────
+  window.salvarProduto = async (e) => {
+    e.preventDefault();
+    if (!usuarioAtual) return;
+    const id = document.getElementById('prod-id').value;
+
+    const dados = {
+      name:        document.getElementById('prod-name').value,
+      type:        document.getElementById('prod-type').value,
+      flow:        document.getElementById('prod-flow').value,
+      price:       parseFloat(document.getElementById('prod-price').value),
+      image:       document.getElementById('prod-image').value,
+      pai:         document.getElementById('prod-pai').value,
+      mae:         document.getElementById('prod-mae').value,
+      thc:         document.getElementById('prod-thc').value,
+      cbd:         document.getElementById('prod-cbd').value,
+      indoor:      document.getElementById('prod-indoor').value,
+      outdoor:     document.getElementById('prod-outdoor').value,
+      efeitos:     [...tagsEfeitos],
+      aromas:      [...tagsAromas],
+      descricao:   document.getElementById('prod-desc').value,
+      breederUid:  usuarioAtual.uid,
+      breederEmail: usuarioAtual.email,
+    };
+
+    try {
+      const btn = document.getElementById('btn-submit-text');
+      btn.textContent = 'Salvando...'; btn.disabled = true;
+
+      if (id) {
+        await updateDoc(doc(db, "products", id), dados);
+      } else {
+        dados.createdAt = serverTimestamp();
+        await addDoc(collection(db, "products"), dados);
+      }
+      window.cancelarEdicao();
+      await window.carregarProdutosDoBreeder();
+      btn.textContent = id ? 'Salvar Alterações' : 'Adicionar à Vitrine';
+      btn.disabled = false;
+    } catch (err) {
+      alert('Erro ao salvar: ' + err.message);
+      document.getElementById('btn-submit-text').disabled = false;
+    }
+  };
+
+  // ── PRODUTO: CARREGAR LISTA ──────────────────────────────
+  window.carregarProdutosDoBreeder = async () => {
+    if (!usuarioAtual) return;
+    const container = document.getElementById('products-list');
+    try {
+      const q = query(collection(db, "products"), where("breederUid", "==", usuarioAtual.uid));
+      const snap = await getDocs(q);
+      container.innerHTML = '';
+      produtosLocais = [];
+      if (snap.empty) { container.innerHTML = '<p style="color:var(--muted)">Nenhuma strain cadastrada.</p>'; return; }
+      snap.forEach(docSnap => {
+        const item = docSnap.data();
+        produtosLocais.push({ id: docSnap.id, ...item });
+        const div = document.createElement('div');
+        div.className = 'product-item';
+        div.innerHTML = `
+          <div class="product-info">
+            <h4>${item.name}</h4>
+            <p>${item.type} • ${item.flow}${item.thc ? ' • THC ' + item.thc : ''}</p>
+          </div>
+          <div class="product-meta">
+            <span class="price-tag">R$ ${item.price.toFixed(2)}</span>
+            <div style="display:flex;gap:0.4rem">
+              <button class="edit-btn" onclick="window.prepararEdicao('${docSnap.id}')">Editar</button>
+              <button class="del-btn" onclick="window.excluirProduto('${docSnap.id}', '${(item.name||'').replace(/'/g,"\\'")}')">Excluir</button>
+            </div>
+          </div>`;
+        container.appendChild(div);
+      });
+    } catch (e) { container.innerHTML = '<p style="color:var(--red)">Erro ao buscar dados.</p>'; }
+  };
+
+  // ── PRODUTO: EXCLUIR ─────────────────────────────────────
+  window.excluirProduto = async (id, nome) => {
+    if (!confirm(`Excluir "${nome}" da vitrine?\n\nEssa ação não pode ser desfeita.`)) return;
+    try {
+      await deleteDoc(doc(db, "products", id));
+      await window.carregarProdutosDoBreeder();
+    } catch (err) {
+      alert('Erro ao excluir: ' + err.message);
+    }
+  };
+
+  // ── PRODUTO: EDITAR ──────────────────────────────────────
+  window.prepararEdicao = (id) => {
+    const item = produtosLocais.find(p => p.id === id);
+    if (!item) return;
+
+    document.getElementById('prod-id').value    = id;
+    document.getElementById('prod-name').value  = item.name    || '';
+    document.getElementById('prod-type').value  = item.type    || 'Feminizada';
+    document.getElementById('prod-flow').value  = item.flow    || '';
+    document.getElementById('prod-price').value = item.price   || '';
+    document.getElementById('prod-image').value = item.image   || '';
+    document.getElementById('prod-pai').value   = item.pai     || '';
+    document.getElementById('prod-mae').value   = item.mae     || '';
+    document.getElementById('prod-thc').value   = item.thc     || '';
+    document.getElementById('prod-cbd').value   = item.cbd     || '';
+    document.getElementById('prod-indoor').value  = item.indoor  || '';
+    document.getElementById('prod-outdoor').value = item.outdoor || '';
+    document.getElementById('prod-desc').value  = item.descricao || '';
+
+    loadTags(tagsEfeitos, item.efeitos);
+    loadTags(tagsAromas,  item.aromas);
+    renderTags('wrap-efeitos', 'input-efeitos', tagsEfeitos);
+    renderTags('wrap-aromas',  'input-aromas',  tagsAromas);
+
+    document.getElementById('form-title').textContent        = 'Editando Strain';
+    document.getElementById('btn-submit-text').textContent   = 'Salvar Alterações';
+    document.getElementById('btn-cancel-edit').style.display = 'block';
+    document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.cancelarEdicao = () => {
+    document.getElementById('product-form').reset();
+    document.getElementById('prod-id').value = '';
+    tagsEfeitos.length = 0; tagsAromas.length = 0;
+    renderTags('wrap-efeitos', 'input-efeitos', tagsEfeitos);
+    renderTags('wrap-aromas',  'input-aromas',  tagsAromas);
+    document.getElementById('form-title').textContent        = 'Nova Strain';
+    document.getElementById('btn-submit-text').textContent   = 'Adicionar à Vitrine';
+    document.getElementById('btn-cancel-edit').style.display = 'none';
+  };
+
+  // ── PERFIL ───────────────────────────────────────────────
+  window.abrirModalPerfil = async () => {
+    document.getElementById('modal-perfil').style.display = 'flex';
+    const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+    if (userDoc.exists()) {
+      document.getElementById('perfil-nome').value = userDoc.data().name  || '';
+      document.getElementById('perfil-foto').value = userDoc.data().photo || '';
+    }
+  };
+
+  window.fecharModalPerfil = () => document.getElementById('modal-perfil').style.display = 'none';
+
+  window.salvarPerfil = async (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    const currentPass = document.getElementById('current-pass').value;
+    const newPass     = document.getElementById('new-pass').value;
+    const confirmPass = document.getElementById('confirm-pass').value;
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        name:  document.getElementById('perfil-nome').value,
+        photo: document.getElementById('perfil-foto').value
+      }, { merge: true });
+
+      if (currentPass || newPass || confirmPass) {
+        if (!currentPass || !newPass || !confirmPass) { alert("Preencha todos os campos de senha."); return; }
+        if (newPass !== confirmPass) { alert("As senhas novas não coincidem!"); return; }
+        if (newPass.length < 6) { alert("A nova senha deve ter pelo menos 6 caracteres."); return; }
+        const cred = EmailAuthProvider.credential(user.email, currentPass);
+        await reauthenticateWithCredential(user, cred);
+        await updatePassword(user, newPass);
+        alert("Perfil e senha atualizados!");
+      } else { alert("Perfil atualizado!"); }
+      window.fecharModalPerfil();
+      document.getElementById('form-perfil').reset();
+    } catch (err) {
+      if (err.code === 'auth/wrong-password') alert("Senha atual incorreta.");
+      else alert("Erro: " + err.message);
+    }
+  };
+
+  window.fazerLogout = async () => {
+    try { executandoLogout = true; await signOut(auth); window.location.href = 'index.html'; }
+    catch (e) { executandoLogout = false; alert(e.message); }
+  };
+</script>
+</body>
+</html>
